@@ -9,11 +9,12 @@ import beyond21.xrays as Xobj
 import beyond21.interpolations as pre
 import beyond21.non_ion_uv as Uobj
 import beyond21.inter_galactic_medium as IGM
+from beyond21.dark_photon import get_Pconv
 
 
 class evolver():
     
-    def __init__(self, cosmo, star_formation_params = None, xray_params = None, reion_params = None, photoheat = True, Lya_Heat = True, CMB_Heat = True):
+    def __init__(self, cosmo, star_formation_params = None, xray_params = None, reion_params = None, photoheat = True, Lya_Heat = True, CMB_Heat = True, dp_kwargs = None):
         self.cosmo = cosmo
         self.Pop = star_formation_params.get('model') #Stellar populations of interest ('PopII' / 'PopIII' / 'PopII+PopIII')
         self.CMB_Heat = CMB_Heat
@@ -23,6 +24,7 @@ class evolver():
         self.generate_Xrays_heat_ion_interps(xray_params)
         self.generate_stellar_Lya_interps(reion_params)
         self.Ts_prev = 0
+        self.dp_kwargs = dp_kwargs
     
     def generate_UVion_SFRD_interps(self,reion_params,star_formation_params, photoheat):
         sfr_ion = fobj.SFRD_UVion(self.cosmo, star_formation_params,reion_params, photoheat = photoheat)
@@ -88,7 +90,10 @@ class evolver():
         
         #T21 evolution
         self.Tspin, self.T21 = self.T21Evolution()
-
+        if self.dp_kwargs is not None:
+            mA = self.dp_kwargs["mA"]
+            epsilon = 10**self.dp_kwargs["log_epsilon"]     
+            self.T21 -= self.cosmo.Tcmb0 * get_Pconv(mA, epsilon, self.rs**-1 * consts.E_21, self.cosmo)
         #CMB optical depth to reionization
         self.tau_e()
         return

@@ -1,0 +1,25 @@
+#!/bin/bash -l
+# Nautilus scan over dark-photon masses: one array task per mass, log-spaced in eV.
+# Submit from anywhere:  qsub run_dp_scan.qsub
+# Change NMASS together with the -t range.
+#$ -N dp_scan
+#$ -t 1-11
+#$ -pe omp 4
+#$ -l h_rt=48:00:00
+#$ -j y
+#$ -o dp_scan.$TASK_ID.log
+
+NMASS=11
+LOGM_MIN=-15
+LOGM_MAX=-10
+
+module load miniconda
+conda activate beyond21
+cd /home/bakerem/Beyond21/src/beyond21
+
+MA=$(python -c "import numpy as np; print(np.logspace($LOGM_MIN, $LOGM_MAX, $NMASS)[$SGE_TASK_ID - 1])")
+echo "task $SGE_TASK_ID: mA = $MA eV"
+
+# chain_num run_mode saras fresh_run reion cxb uvlf save_blobs sfe_21cmFAST fixed popII_only mA
+python run_nautilus_local.py "dp$SGE_TASK_ID" constant_xPL False True \
+    True True True True False none False "$MA"

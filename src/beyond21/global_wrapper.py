@@ -13,7 +13,7 @@ Greys = cm.get_cmap('Greys')
 
 class GlobalWrapper(Eobj.evolver):
     def __init__(self, star_formation_params, xray_params, reion_params, cosmo_params = None,
-                 photoheat = True, Lya_Heat = True, CMB_Heat = True):
+                 photoheat = True, Lya_Heat = True, CMB_Heat = True, dp_kwargs = None):
         
         self.verify_cosmo_params(cosmo_params)
         self.verify_star_formation_params(star_formation_params)
@@ -27,7 +27,8 @@ class GlobalWrapper(Eobj.evolver):
                          reion_params = reion_params,
                          photoheat = photoheat,
                          Lya_Heat = Lya_Heat,
-                         CMB_Heat = CMB_Heat)
+                         CMB_Heat = CMB_Heat,
+                         dp_kwargs = dp_kwargs)
 
     
     def verify_star_formation_params(self, star_formation_params):
